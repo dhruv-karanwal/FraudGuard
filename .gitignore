@@ -20,3 +20,7 @@ DL_CP_REPORT.pdf
 .env
 .DS_Store
 Thumbs.db
+
+# Generated reports (numbers are copied into README)
+reports/*.json
+reports/*.txt
