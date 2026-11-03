@@ -216,7 +216,8 @@ def page_performance():
     table = pd.DataFrame(rows).set_index("model")
     st.dataframe(table.style.format({c: "{:.4f}" for c in ["precision", "recall", "f1", "roc_auc", "pr_auc",
                                                             "threshold"]})
-                 .highlight_max(subset=["precision", "recall", "f1", "roc_auc", "pr_auc"], color="#d4edda"),
+                 .highlight_max(subset=["precision", "recall", "f1", "roc_auc", "pr_auc"],
+                                props="font-weight: bold; color: #2ca02c"),
                  width="stretch")
 
     tabs = st.tabs(["Comparison", "Confusion matrices", "ROC / PR", "Training", "Architecture"])
