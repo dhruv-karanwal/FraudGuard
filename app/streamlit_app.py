@@ -125,6 +125,13 @@ def page_predict():
             st.session_state["example"] = df[df.isFraud == 1].sample(1, random_state=None).iloc[0].to_dict()
         if c2.button("Load a test legit example"):
             st.session_state["example"] = df[df.isFraud == 0].sample(1, random_state=None).iloc[0].to_dict()
+        # Demo link: ?page=predict&example=fraud|legit loads a fixed example and scores it.
+        qp = str(st.query_params.get("example", "")).lower()
+        if qp in ("fraud", "legit") and not st.session_state.get("demo_done"):
+            pool = df[df.isFraud == (1 if qp == "fraud" else 0)]
+            st.session_state["example"] = pool.sample(1, random_state=config.SEED).iloc[0].to_dict()
+            st.session_state["demo_done"] = True
+            st.session_state["autoscore"] = True
     ex = st.session_state.get("example", {})
 
     with st.form("txn"):
@@ -146,7 +153,7 @@ def page_predict():
                               column_config={"type": st.column_config.SelectboxColumn(options=types)})
         submitted = st.form_submit_button("Score transaction", type="primary")
 
-    if not submitted:
+    if not (submitted or st.session_state.pop("autoscore", False)):
         return
     current = {"step": step, "type": ttype, "amount": amount, "oldbalanceOrg": ob_o, "newbalanceOrig": nb_o,
                "oldbalanceDest": ob_d, "newbalanceDest": nb_d}
@@ -233,8 +240,10 @@ def page_performance():
 
 
 PAGES = {"Dashboard": page_dashboard, "Predict Transaction": page_predict, "Model Performance": page_performance}
+SLUGS = {"dashboard": 0, "predict": 1, "performance": 2}  # deep links: ?page=predict
 with st.sidebar:
     st.header("FraudGuard")
-    choice = st.radio("Page", list(PAGES))
+    start = SLUGS.get(str(st.query_params.get("page", "")).lower(), 0)
+    choice = st.radio("Page", list(PAGES), index=start)
     st.caption(f"Artifacts: `{TAG or 'none'}`")
 PAGES[choice]()
