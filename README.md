@@ -5,6 +5,9 @@ with a Streamlit dashboard for live prediction and model performance.
 
 Course project (Deep Learning, VIT Pune).
 
+**Full documentation** (architecture, step-by-step process, problems and fixes, results with figures, app
+screenshots): [docs/PROJECT_DOCUMENTATION.md](docs/PROJECT_DOCUMENTATION.md)
+
 ## Pipeline
 - **Data**: PaySim (Kaggle `ealaxi/paysim1`), 6,362,620 transactions, 8,213 fraud (0.129%).
   Fraud occurs only in TRANSFER and CASH_OUT, so the models score only those 2,770,409 rows.
@@ -36,7 +39,10 @@ Confusion matrix columns follow the standard layout [[TN, FP], [FN, TP]].
 
 Train times are on CPU (16 threads); TensorFlow has no GPU support on native Windows.
 
-Figures are written to `reports/figures/` by `src.eda` and `src.evaluate` (generated, not tracked):
+![Model comparison](docs/images/model_comparison.png)
+
+Figures are written to `reports/figures/` by `src.eda` and `src.evaluate` (generated, not tracked;
+copies used by the documentation live in `docs/images/`):
 `model_comparison.png` (metrics plus FP/FN counts per model), `class_distribution.png`,
 `fraud_over_time.png`, `amount_distribution.png`, `training_curves.png`, `roc_pr_curves.png`,
 `confusion_matrix_*.png`, `architecture.png`.
