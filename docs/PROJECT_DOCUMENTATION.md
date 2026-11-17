@@ -377,8 +377,10 @@ Every transfer is scored and given one of three decisions: **BLOCK** (probabilit
 validation-tuned threshold, 0.9989), **REVIEW** (0.50 up to the threshold, sent to an analyst) or
 **APPROVE**. Decisions are always shown as text as well as colour (red, amber, green).
 
-Run with `streamlit run app/streamlit_app.py`. The design follows a dark fintech style (navy background,
-Fira Sans / Fira Code, SVG logo and Material icons, no emoji) and has six pages in two groups. Each page has
+Run with `streamlit run app/streamlit_app.py`. The design is a light monochrome style (white surfaces,
+charcoal text and controls, Fira Sans / Fira Code, SVG logo and Material icons, no emoji). Red, amber and
+green appear only for risk decisions, in shades that keep at least 4.5:1 contrast on white. The console has
+six pages in two groups. Each page has
 its own address: `/` (Overview), `/alerts`, `/investigate?txn=<id>`, `/live`, `/check?example=fraud` (loads
 and scores a fixed test fraud) and `/model`. A status bar on every page shows the model, the block threshold,
 the review band and the monitoring window.
