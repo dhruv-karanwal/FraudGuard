@@ -5,7 +5,7 @@ import streamlit as st
 
 from app import core
 
-st.title("Overview")
+core.header("Overview", "Business outcomes of the fraud model across the monitoring window: money protected, fraud caught and the cost of mistakes.")
 df = core.transactions()
 if df is None:
     st.info("No scored transactions yet. Run `python -m src.evaluate`.")
@@ -33,7 +33,7 @@ c[4].metric("Fraud missed", core.fmt_money(m["lost"]), border=True,
             help=f"{m['missed']:,} fraudulent transfers slipped through.")
 
 left, right = st.columns([2.2, 1])
-with left:
+with left, core.card("trend"):
     st.subheader("Alerts vs actual fraud per hour")
     df["blocked"] = df["tier"] == "BLOCK"
     df["missed"] = (~df["blocked"]) & (df["isFraud"] == 1)
@@ -55,7 +55,7 @@ with left:
     st.caption(f"Red triangles mark the {n_miss_hours} hours with at least one missed fraud. "
                "Solid line = model alerts, dashed line = actual fraud.")
 
-with right:
+with right, core.card("decisions"):
     st.subheader("Decisions")
     counts = df["tier"].value_counts().reindex(core.TIERS, fill_value=0).reset_index()
     counts.columns = ["Decision", "Transfers"]

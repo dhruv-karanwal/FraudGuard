@@ -3,7 +3,7 @@ import streamlit as st
 
 from app import core
 
-st.title("Alert queue")
+core.header("Alert queue", "Every transfer the model blocked or sent for review. Filter the queue and select a row to open its case.")
 df = core.transactions()
 if df is None:
     st.info("No scored transactions yet.")
@@ -12,12 +12,13 @@ if df is None:
 alerts = core.with_status(df[df["tier"] != "APPROVE"])
 lo, hi = int(df["step"].min()), int(df["step"].max())
 
-f = st.columns([1, 1.2, 2.6])
+filters = core.card("filters")
+f = filters.columns([1, 1.2, 2.6])
 tiers = f[0].pills("Decision", ["BLOCK", "REVIEW"], selection_mode="multi", default=["BLOCK", "REVIEW"])
 types = f[1].pills("Type", ["TRANSFER", "CASH_OUT"], selection_mode="multi", default=["TRANSFER", "CASH_OUT"])
 statuses = f[2].pills("Status", list(core.STATUSES), selection_mode="multi",
                       default=["New", "Investigating", "Escalated"])
-g = st.columns([1, 3])
+g = filters.columns([1, 3])
 min_amt = g[0].number_input("Min amount", min_value=0.0, value=0.0, step=10000.0)
 hours = g[1].slider("Hours", lo, hi, (lo, hi))
 

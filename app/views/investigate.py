@@ -4,7 +4,7 @@ import streamlit as st
 
 from app import core
 
-st.title("Investigate")
+core.header("Investigate", "Review one alert: why it was flagged, what drove the model, where the money went, and your decision.")
 df = core.transactions()
 if df is None:
     st.info("No scored transactions yet.")
@@ -16,7 +16,7 @@ wanted = int(qp) if qp and str(qp).isdigit() else st.session_state.get("case_id"
 ids = alerts["row_id"].astype(int).tolist()
 if wanted not in ids:
     wanted = ids[0]
-choice = st.selectbox("Case", ids, index=ids.index(wanted),
+choice = core.card("case").selectbox("Case", ids, index=ids.index(wanted),
                       format_func=lambda r: f"#{r} · {core.case(r)['status']}")
 st.session_state["case_id"] = choice
 st.query_params["txn"] = choice
@@ -42,7 +42,7 @@ with top[0]:
         "Balance after": st.column_config.NumberColumn(format="%,.2f")})
 
 with top[1]:
-    with st.container(border=True):
+    with core.card("why"):
         st.markdown("**Why it was flagged**")
         sig = core.signals(row, large)
         st.markdown(" ".join(core.chip(s, core.SIGNAL_BG, core.SIGNAL_FG) for s in sig) or "No rule-based signals.",

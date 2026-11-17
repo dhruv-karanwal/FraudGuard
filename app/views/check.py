@@ -7,9 +7,9 @@ import streamlit as st
 from app import core
 from src import config
 
-st.title("Check transaction")
+core.header("Check transaction", "Score a transfer before it settles, the way a payment gateway would call the model.", section="Tools")
 pred = core.predictor()
-st.caption("Score a transfer before it settles. Only TRANSFER and CASH_OUT are scored, because fraud never "
+st.caption("Only TRANSFER and CASH_OUT are scored, because fraud never "
            "occurs in other types. Decision tiers: BLOCK at or above the validation-tuned threshold, "
            f"REVIEW from {core.REVIEW_FLOOR:.2f}, otherwise APPROVE.")
 
@@ -78,7 +78,7 @@ if ex and ex.get("type") == ttype and float(ex.get("amount", -1)) == amount:
     st.caption(f"Loaded example's true label: {'fraud' if ex.get('isFraud') == 1 else 'legit'}")
 
 left, right = st.columns(2)
-with left, st.container(border=True):
+with left, core.card("why"):
     st.markdown("**Why**")
     large = float(df["amount"].quantile(0.99)) if df is not None else float("inf")
     sig = core.signals(current, large)
@@ -87,7 +87,7 @@ with left, st.container(border=True):
     fw = res.fusion_weights
     st.progress(fw["transaction"], text=f"Driven by this transaction: {fw['transaction']:.0%}")
     st.progress(fw["history"], text=f"Driven by account history: {fw['history']:.0%}")
-with right, st.container(border=True):
+with right, core.card("attention"):
     st.markdown("**Temporal attention** over the account window (oldest → current)")
     w = res.time_attention[-res.window_len:]
     labels = [f"t-{res.window_len - 1 - i}" if i < res.window_len - 1 else "current" for i in range(res.window_len)]

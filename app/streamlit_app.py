@@ -37,5 +37,4 @@ nav = st.navigation({
         st.Page("views/model.py", title="Model & reports", icon=":material/analytics:", url_path="model"),
     ],
 })
-core.status_bar()
 nav.run()

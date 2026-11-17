@@ -9,7 +9,7 @@ from src import config
 LABELS = {"logreg": "LogReg", "random_forest": "RandomForest", "xgboost": "XGBoost",
           "dnn_only": "DNN-only", "hybrid_gru": "Hybrid (DNN+GRU)", "hybrid_lstm": "Hybrid (DNN+LSTM)"}
 
-st.title("Model & reports")
+core.header("Model & reports", "Choose the block threshold by business cost, and see how the model was built and tested.", section="Tools")
 tabs = st.tabs(["Threshold & cost", "Model card", "Test results", "Figures"])
 
 with tabs[0]:
@@ -55,7 +55,8 @@ with tabs[0]:
                                                        range=["diamond", "circle"]), title=None),
             color=alt.Color("label:N", scale=alt.Scale(domain=["Cost-optimal", "Deployed"],
                                                        range=[core.TIER_COLOR["APPROVE"], core.TIER_COLOR["REVIEW"]]), title=None))
-        st.altair_chart((line + dots).properties(height=320), width="stretch")
+        with core.card("tradeoff"):
+            st.altair_chart((line + dots).properties(height=320), width="stretch")
         st.caption("Each point on the line is one threshold: moving left means fewer false alarms, moving down "
                    "means less fraud slips through. Raise the false-alarm cost to watch the optimum move left. "
                    "The deployed threshold stays the F1-tuned one reported in the project.")

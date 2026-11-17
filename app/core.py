@@ -149,7 +149,7 @@ def fmt_money(x: float) -> str:
     return f"{x:,.0f}"
 
 
-def chip(text: str, color: str = "#F4F4F5", fg: str = "#18181B") -> str:
+def chip(text: str, color: str = "#E4E4E7", fg: str = "#18181B") -> str:
     return f'<span class="fg-chip" style="background:{color};color:{fg}">{text}</span>'
 
 
@@ -159,17 +159,44 @@ def tier_chip(t: str) -> str:
 
 CSS = """
 <style>
-.fg-status{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;padding:8px 14px;margin:-8px 0 14px;
-  border:1px solid #E4E4E7;border-radius:10px;background:#FAFAFA;font-size:0.86rem;color:#52525B}
-.fg-status b{color:#171717;font-weight:600}
-.fg-live{color:#171717;font-weight:700;letter-spacing:.04em}
-.fg-live::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#DC2626;
-  margin-right:6px;vertical-align:middle;animation:fg-pulse 2s infinite}
+/* Canvas: soft grey with a faint dot grid, so white cards stand out. */
+[data-testid="stMain"]{background-color:#F1F2F4;
+  background-image:radial-gradient(#D4D4D8 1px, transparent 1px);background-size:22px 22px}
+[data-testid="stHeader"]{background:transparent}
+[data-testid="stSidebar"]{border-right:1px solid #E4E4E7}
+[data-testid="stMainBlockContainer"]{padding-top:2.2rem}
+
+/* Cards: metrics, forms, tables, expanders and keyed panels (core.card). */
+[data-testid="stMetric"],[data-testid="stForm"],[data-testid="stExpander"],[class*="st-key-card"]{
+  background:#FFFFFF;border-color:#E4E4E7 !important;border-radius:12px !important;
+  box-shadow:0 1px 2px rgba(16,24,40,.05),0 1px 3px rgba(16,24,40,.07)}
+[data-testid="stDataFrameResizable"]{border-radius:12px;box-shadow:0 1px 2px rgba(16,24,40,.05),0 1px 3px rgba(16,24,40,.07)}
+
+/* Page header band */
+.fg-hero{position:relative;overflow:hidden;border-radius:16px;padding:26px 30px 20px;margin-bottom:18px;color:#FAFAFA;
+  background:
+    radial-gradient(circle at 88% -30%, rgba(255,255,255,.13), transparent 45%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, transparent 1px 26px),
+    linear-gradient(135deg,#111113 0%,#1F1F23 55%,#2E2E33 100%);
+  box-shadow:0 10px 30px -12px rgba(16,24,40,.45)}
+.fg-eyebrow{font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:#A1A1AA;font-weight:600}
+.fg-title{font-size:2.15rem;font-weight:700;line-height:1.15;margin:6px 0 4px;color:#FFFFFF}
+.fg-sub{color:#D4D4D8;font-size:.95rem;max-width:880px;margin:0 0 16px}
+.fg-pills{display:flex;flex-wrap:wrap;gap:8px}
+.fg-pill{padding:4px 11px;border-radius:999px;font-size:.8rem;color:#E4E4E7;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12)}
+.fg-pill b{color:#FFFFFF;font-weight:600}
+.fg-live{color:#FFFFFF;font-weight:700;letter-spacing:.06em}
+.fg-live::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#EF4444;
+  margin-right:6px;vertical-align:middle;box-shadow:0 0 0 3px rgba(239,68,68,.25);animation:fg-pulse 2s infinite}
 @keyframes fg-pulse{0%{opacity:1}50%{opacity:.35}100%{opacity:1}}
 @media (prefers-reduced-motion: reduce){.fg-live::before{animation:none}}
+
 .fg-chip{display:inline-block;padding:3px 10px;margin:2px 6px 2px 0;border-radius:999px;font-size:0.82rem;
   font-weight:600;line-height:1.4;white-space:nowrap}
-.fg-decision{border-radius:12px;padding:18px 22px;border:2px solid;margin-bottom:8px}
+.fg-decision{border-radius:12px;padding:18px 22px;border:2px solid;margin-bottom:8px;background-color:#FFFFFF;
+  box-shadow:0 1px 3px rgba(16,24,40,.07)}
 .fg-decision .label{font-size:2rem;font-weight:700;letter-spacing:.04em}
 .fg-decision .sub{color:#3F3F46;font-size:0.92rem}
 .fg-muted{color:#52525B;font-size:0.9rem}
@@ -177,26 +204,36 @@ CSS = """
 """
 
 
-def status_bar() -> None:
+def header(title: str, subtitle: str, section: str = "Operations") -> None:
+    """Dark page header band with the title, a one-line purpose and the live system status."""
     p = predictor()
     df = transactions()
     n = f"{len(df):,}" if df is not None else "0"
     b = p.meta["split_boundaries"]
+    pills = [f'<span class="fg-pill fg-live" role="status">LIVE</span>',
+             f'<span class="fg-pill">Model <b>{MODEL}</b> ({TAG})</span>',
+             f'<span class="fg-pill">Block ≥ <b>{p.threshold:.4f}</b></span>',
+             f'<span class="fg-pill">Review ≥ <b>{REVIEW_FLOOR:.2f}</b></span>',
+             f'<span class="fg-pill">Window <b>hours {b["last_val_step"] + 1}–743</b></span>',
+             f'<span class="fg-pill"><b>{n}</b> transfers scored</span>']
     st.markdown(
-        f'<div class="fg-status" role="status"><span class="fg-live">LIVE</span>'
-        f'<span>Model <b>{MODEL}</b> ({TAG})</span>'
-        f'<span>Block threshold <b>{p.threshold:.4f}</b></span>'
-        f'<span>Review band <b>{REVIEW_FLOOR:.2f}–{p.threshold:.4f}</b></span>'
-        f'<span>Monitoring window <b>hours {b["last_val_step"] + 1}–743</b></span>'
-        f'<span>Scored <b>{n}</b> transfers</span></div>',
+        f'<div class="fg-hero"><div class="fg-eyebrow">FraudGuard · {section}</div>'
+        f'<div class="fg-title" role="heading" aria-level="1">{title}</div>'
+        f'<p class="fg-sub">{subtitle}</p><div class="fg-pills">{"".join(pills)}</div></div>',
         unsafe_allow_html=True)
+
+
+def card(name: str):
+    """White elevated panel; the key gives it a CSS class (st-key-card_<name>)."""
+    return st.container(border=True, key=f"card_{name}")
 
 
 def decision_card(t: str, prob: float, latency_ms: float | None = None) -> None:
     verb = {"BLOCK": "Transaction blocked", "REVIEW": "Sent to analyst review", "APPROVE": "Transaction approved"}[t]
     lat = f" · scored in {latency_ms:.0f} ms" if latency_ms is not None else ""
     st.markdown(
-        f'<div class="fg-decision" style="border-color:{TIER_COLOR[t]};background:{TIER_COLOR[t]}1A">'
+        f'<div class="fg-decision" style="border-color:{TIER_COLOR[t]};'
+        f'background-image:linear-gradient({TIER_COLOR[t]}14,{TIER_COLOR[t]}14)">'
         f'<div class="label" style="color:{TIER_COLOR[t]}">{t}</div>'
         f'<div class="sub">{verb} · fraud probability <b>{prob:.2%}</b>{lat}</div></div>',
         unsafe_allow_html=True)

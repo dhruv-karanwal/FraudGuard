@@ -4,7 +4,7 @@ import streamlit as st
 
 from app import core
 
-st.title("Live monitor")
+core.header("Live monitor", "A replay of the test period as a live feed: each tick, the next simulated hours of transfers arrive and are scored.")
 df = core.transactions()
 if df is None:
     st.info("No scored transactions yet.")
@@ -20,9 +20,8 @@ ss = st.session_state
 ss.setdefault("live_pos", 0)
 ss.setdefault("live_running", False)
 
-st.caption("Replays the test period as a live feed: each tick, the next simulated hour of transfers arrives "
-           "and is scored by the model. Use Pause to stop updates at any time.")
-c = st.columns([1, 1, 1.4, 3])
+st.caption("Pick a speed and press Start; Pause stops updates at any time.")
+c = core.card("controls").columns([1, 1, 1.4, 3], vertical_alignment="bottom")
 if c[0].button("Pause" if ss.live_running else ("Resume" if ss.live_pos else "Start"), type="primary",
                icon=":material/pause:" if ss.live_running else ":material/play_arrow:", width="stretch"):
     ss.live_running = not ss.live_running and ss.live_pos < len(hours)
@@ -63,7 +62,7 @@ def board():
     st.progress(pos / len(hours), text=f"{pos} of {len(hours)} hours replayed")
 
     left, right = st.columns([2, 1])
-    with left:
+    with left, core.card("live_chart"):
         if len(seen):
             long = seen.melt("step", ["alerts", "fraud"], var_name="Series", value_name="Count")
             chart = alt.Chart(long).mark_line(strokeWidth=1.6).encode(
@@ -75,7 +74,7 @@ def board():
             st.altair_chart(chart.properties(height=280), width="stretch")
         else:
             st.markdown('<p class="fg-muted">Press Start to begin the replay.</p>', unsafe_allow_html=True)
-    with right:
+    with right, core.card("live_feed"):
         st.markdown("**Latest blocks**")
         feed = done[done["blocked"]].sort_values(["step", "row_id"], ascending=False).head(8)
         for _, r in feed.iterrows():

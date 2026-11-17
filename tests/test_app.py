@@ -13,7 +13,8 @@ from src.inference import available_tag
 AppTest = pytest.importorskip("streamlit.testing.v1").AppTest
 APP = str(Path(__file__).resolve().parents[1] / "app" / "streamlit_app.py")
 needs_model = pytest.mark.skipif(available_tag() is None, reason="no trained hybrid model")
-PAGES = ["overview", "alerts", "investigate", "live", "check", "model"]
+PAGES = {"overview": "Overview", "alerts": "Alert queue", "investigate": "Investigate", "live": "Live monitor",
+         "check": "Check transaction", "model": "Model & reports"}
 
 
 def _open(page: str):
@@ -29,7 +30,8 @@ def _open(page: str):
 @pytest.mark.parametrize("page", PAGES)
 def test_page_renders_without_exception(page):
     at = _open(page)
-    assert len(at.title) == 1
+    # Each page opens with the header band carrying its title.
+    assert any(f'aria-level="1">{PAGES[page]}<' in m.value for m in at.markdown)
 
 
 @needs_model
