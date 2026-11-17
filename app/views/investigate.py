@@ -45,7 +45,7 @@ with top[1]:
     with st.container(border=True):
         st.markdown("**Why it was flagged**")
         sig = core.signals(row, large)
-        st.markdown(" ".join(core.chip(s, "#7F1D1D") for s in sig) or "No rule-based signals.",
+        st.markdown(" ".join(core.chip(s, core.SIGNAL_BG, core.SIGNAL_FG) for s in sig) or "No rule-based signals.",
                     unsafe_allow_html=True)
         st.markdown("**What drove the model**")
         fw = res.fusion_weights

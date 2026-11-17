@@ -69,12 +69,12 @@ def board():
             chart = alt.Chart(long).mark_line(strokeWidth=1.6).encode(
                 x=alt.X("step:Q", title="Simulated hour", scale=alt.Scale(domain=[hours[0], hours[-1]])),
                 y=alt.Y("Count:Q", title="Transfers per hour"),
-                color=alt.Color("Series:N", scale=alt.Scale(domain=["alerts", "fraud"], range=["#38BDF8", "#94A3B8"])),
+                color=alt.Color("Series:N", scale=alt.Scale(domain=["alerts", "fraud"], range=[core.INK, core.SUBTLE])),
                 strokeDash=alt.StrokeDash("Series:N", scale=alt.Scale(domain=["alerts", "fraud"],
                                                                       range=[[1, 0], [4, 3]])))
             st.altair_chart(chart.properties(height=280), width="stretch")
         else:
-            st.info("Press Start to begin the replay.")
+            st.markdown('<p class="fg-muted">Press Start to begin the replay.</p>', unsafe_allow_html=True)
     with right:
         st.markdown("**Latest blocks**")
         feed = done[done["blocked"]].sort_values(["step", "row_id"], ascending=False).head(8)

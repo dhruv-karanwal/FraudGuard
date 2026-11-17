@@ -43,11 +43,11 @@ with left:
     lines = alt.Chart(long).mark_line(strokeWidth=1.6).encode(
         x=alt.X("step:Q", title="Simulated hour"),
         y=alt.Y("Count:Q", title="Transfers per hour"),
-        color=alt.Color("Series:N", scale=alt.Scale(domain=["Alerts", "Fraud"], range=["#38BDF8", "#94A3B8"])),
+        color=alt.Color("Series:N", scale=alt.Scale(domain=["Alerts", "Fraud"], range=[core.INK, core.SUBTLE])),
         strokeDash=alt.StrokeDash("Series:N", scale=alt.Scale(domain=["Alerts", "Fraud"], range=[[1, 0], [4, 3]])),
         tooltip=["step", "Series", "Count"])
     miss = alt.Chart(hourly[hourly["Missed"] > 0]).mark_point(shape="triangle-down", size=90, filled=True,
-                                                             color="#EF4444").encode(
+                                                             color=core.TIER_COLOR["BLOCK"]).encode(
         x="step:Q", y=alt.Y("Fraud:Q"), tooltip=[alt.Tooltip("step", title="Hour"),
                                                  alt.Tooltip("Missed", title="Missed fraud")])
     st.altair_chart((lines + miss).properties(height=300), width="stretch")
@@ -65,7 +65,7 @@ with right:
         color=alt.Color("Decision:N", legend=None,
                         scale=alt.Scale(domain=list(core.TIERS), range=[core.TIER_COLOR[t] for t in core.TIERS])),
         tooltip=["Decision", "Transfers"])
-    text = bar.mark_text(align="left", dx=4, color="#F8FAFC").encode(text=alt.Text("Transfers:Q", format=","))
+    text = bar.mark_text(align="left", dx=4, color=core.INK).encode(text=alt.Text("Transfers:Q", format=","))
     st.altair_chart((bar + text).properties(height=160), width="stretch")
     by_type = df[df["blocked"]].groupby("type").size().rename("Blocked")
     st.markdown("**Blocked by type**")

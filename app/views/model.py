@@ -43,7 +43,7 @@ with tabs[0]:
         marks = pd.DataFrame({"fa": [best["false_alarms"] + 1, cur_m["false_alarms"] + 1],
                               "missed_amount": [max(best["missed_amount"], 1), max(cur_m["lost"], 1)],
                               "label": ["Cost-optimal", "Deployed"]})
-        line = alt.Chart(pts).mark_line(color="#38BDF8", strokeWidth=2).encode(
+        line = alt.Chart(pts).mark_line(color=core.INK, strokeWidth=2).encode(
             x=alt.X("fa:Q", scale=alt.Scale(type="log"), title="False alarms + 1 (log)"),
             y=alt.Y("missed_amount:Q", scale=alt.Scale(type="log"), title="Missed fraud amount (log)"),
             tooltip=[alt.Tooltip("threshold", format=".6f"), alt.Tooltip("false_alarms", title="False alarms"),
@@ -54,7 +54,7 @@ with tabs[0]:
             shape=alt.Shape("label:N", scale=alt.Scale(domain=["Cost-optimal", "Deployed"],
                                                        range=["diamond", "circle"]), title=None),
             color=alt.Color("label:N", scale=alt.Scale(domain=["Cost-optimal", "Deployed"],
-                                                       range=["#22C55E", "#F59E0B"]), title=None))
+                                                       range=[core.TIER_COLOR["APPROVE"], core.TIER_COLOR["REVIEW"]]), title=None))
         st.altair_chart((line + dots).properties(height=320), width="stretch")
         st.caption("Each point on the line is one threshold: moving left means fewer false alarms, moving down "
                    "means less fraud slips through. Raise the false-alarm cost to watch the optimum move left. "
@@ -100,7 +100,7 @@ with tabs[2]:
         st.dataframe(table.style.format({c: "{:.4f}" for c in ["precision", "recall", "f1", "roc_auc", "pr_auc",
                                                                 "threshold"]})
                      .highlight_max(subset=["precision", "recall", "f1", "roc_auc", "pr_auc"],
-                                    props="font-weight: bold; color: #22C55E"),
+                                    props="font-weight: bold; color: #15803D"),
                      width="stretch")
         core.figure("model_comparison.png")
 

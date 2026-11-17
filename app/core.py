@@ -18,7 +18,10 @@ ASSETS = Path(__file__).resolve().parent / "assets"
 # Decision tiers. BLOCK uses the validation-tuned threshold; REVIEW is a fixed band below it.
 REVIEW_FLOOR = 0.5  # shortcut: fixed review band [0.5, threshold); make it a setting if analysts need to tune it
 TIERS = ("BLOCK", "REVIEW", "APPROVE")
-TIER_COLOR = {"BLOCK": "#EF4444", "REVIEW": "#F59E0B", "APPROVE": "#22C55E"}
+# Darker shades so text and chips stay >= 4.5:1 contrast on white.
+TIER_COLOR = {"BLOCK": "#DC2626", "REVIEW": "#B45309", "APPROVE": "#15803D"}
+INK, MUTED, SUBTLE = "#171717", "#52525B", "#A1A1AA"  # charcoal palette for charts and text
+SIGNAL_BG, SIGNAL_FG = "#FEE2E2", "#991B1B"  # risk-signal chips
 STATUSES = ("New", "Investigating", "Escalated", "Confirmed fraud", "False positive")
 
 
@@ -146,21 +149,21 @@ def fmt_money(x: float) -> str:
     return f"{x:,.0f}"
 
 
-def chip(text: str, color: str = "#334155", fg: str = "#F8FAFC") -> str:
+def chip(text: str, color: str = "#F4F4F5", fg: str = "#18181B") -> str:
     return f'<span class="fg-chip" style="background:{color};color:{fg}">{text}</span>'
 
 
 def tier_chip(t: str) -> str:
-    return chip(t, TIER_COLOR[t], "#020617")
+    return chip(t, TIER_COLOR[t], "#FFFFFF")
 
 
 CSS = """
 <style>
 .fg-status{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;padding:8px 14px;margin:-8px 0 14px;
-  border:1px solid #334155;border-radius:10px;background:#0E1223;font-size:0.86rem;color:#94A3B8}
-.fg-status b{color:#F8FAFC;font-weight:600}
-.fg-live{color:#22C55E;font-weight:700;letter-spacing:.04em}
-.fg-live::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#22C55E;
+  border:1px solid #E4E4E7;border-radius:10px;background:#FAFAFA;font-size:0.86rem;color:#52525B}
+.fg-status b{color:#171717;font-weight:600}
+.fg-live{color:#171717;font-weight:700;letter-spacing:.04em}
+.fg-live::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#DC2626;
   margin-right:6px;vertical-align:middle;animation:fg-pulse 2s infinite}
 @keyframes fg-pulse{0%{opacity:1}50%{opacity:.35}100%{opacity:1}}
 @media (prefers-reduced-motion: reduce){.fg-live::before{animation:none}}
@@ -168,8 +171,8 @@ CSS = """
   font-weight:600;line-height:1.4;white-space:nowrap}
 .fg-decision{border-radius:12px;padding:18px 22px;border:2px solid;margin-bottom:8px}
 .fg-decision .label{font-size:2rem;font-weight:700;letter-spacing:.04em}
-.fg-decision .sub{color:#CBD5E1;font-size:0.92rem}
-.fg-muted{color:#94A3B8;font-size:0.9rem}
+.fg-decision .sub{color:#3F3F46;font-size:0.92rem}
+.fg-muted{color:#52525B;font-size:0.9rem}
 </style>
 """
 

@@ -82,7 +82,7 @@ with left, st.container(border=True):
     st.markdown("**Why**")
     large = float(df["amount"].quantile(0.99)) if df is not None else float("inf")
     sig = core.signals(current, large)
-    st.markdown(" ".join(core.chip(s, "#7F1D1D") for s in sig) or "No rule-based risk signals.",
+    st.markdown(" ".join(core.chip(s, core.SIGNAL_BG, core.SIGNAL_FG) for s in sig) or "No rule-based risk signals.",
                 unsafe_allow_html=True)
     fw = res.fusion_weights
     st.progress(fw["transaction"], text=f"Driven by this transaction: {fw['transaction']:.0%}")
@@ -91,7 +91,7 @@ with right, st.container(border=True):
     st.markdown("**Temporal attention** over the account window (oldest → current)")
     w = res.time_attention[-res.window_len:]
     labels = [f"t-{res.window_len - 1 - i}" if i < res.window_len - 1 else "current" for i in range(res.window_len)]
-    st.bar_chart(pd.Series(w, index=labels, name="weight"), height=180, color="#38BDF8")
+    st.bar_chart(pd.Series(w, index=labels, name="weight"), height=180, color=core.MUTED)
 
 with st.expander("API response"):
     st.json({"decision": decision, "fraud_probability": round(res.probability, 6),
