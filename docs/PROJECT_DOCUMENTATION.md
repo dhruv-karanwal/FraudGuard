@@ -121,7 +121,7 @@ Python module, and the layers communicate only through files on disk, so any sta
    test set once for all models, and writes metrics and figures. A marker file prevents the test set from
    being scored a second time by accident.
 5. **Serving layer.** `src/inference.py` turns raw transaction fields into exactly the same features as the
-   batch pipeline, and `app/streamlit_app.py` provides the dashboard.
+   batch pipeline, and the FraudGuard console (`app/`) serves analysts (Section 11).
 
 ![Data flow](images/data_flow.png)
 *Figure 5. Data flow and array shapes on the full dataset.*
@@ -144,7 +144,10 @@ FraudGuard/
 │   ├── train.py         hybrid model training
 │   ├── evaluate.py      one-shot test evaluation + figures
 │   └── inference.py     single-transaction predictor for the app
-├── app/streamlit_app.py Streamlit dashboard
+├── app/
+│   ├── streamlit_app.py app shell: theme, navigation, status bar
+│   ├── core.py          decision tiers, risk signals, money metrics, cost curve, cases
+│   └── views/           overview, alerts, investigate, live, check, model pages
 ├── tests/               31 pytest tests
 ├── docs/                this document, diagrams, images
 ├── data/raw/            PaySim CSV (not tracked)
@@ -221,8 +224,8 @@ did we commit and move on. We never moved to the next stage while a check was fa
 - **Result:** the test metrics in Section 9.
 
 ### Stage 6: Streamlit application
-- **Did:** built a three-page app (Dashboard, Predict Transaction, Model Performance) on top of a `Predictor`
-  class.
+- **Did:** first a three-page analysis app, then rebuilt it as a six-page fraud-operations console
+  (Section 11) on top of a `Predictor` class.
 - **Checked:** a test that single-transaction scoring matches the batch pipeline to 1e-5, headless tests that
   every page renders without errors, and manual checks in a browser.
 - **Result:** Section 11.
@@ -249,6 +252,9 @@ did we commit and move on. We never moved to the next stage while a check was fa
 | 13 | **Charts could not tell the models apart** (all > 0.98) | first version of the figures | Zoomed the axes and added a false-positive / false-negative count panel, which shows the real differences. |
 | 14 | **App inference could drift from training features** | design review | The app reuses the same feature and sequence code; a test checks single-row features and scores against the prepared arrays. |
 | 15 | **App display issues** | browser checks | Shortened metric values that were cut off, replaced a deprecated Streamlit argument, and fixed a table highlight that was unreadable in dark mode. |
+| 16 | **Cost-optimal threshold looked worse than the deployed one** | console check: the "optimum" cost more than the current threshold | The first version searched a coarse grid of thresholds and skipped the best values. Replaced it with an exact sweep (sort scores once, cumulative sums), now tested against a direct calculation. |
+| 17 | **Blank or half-rendered screenshots** | headless Chrome captured pages before Streamlit finished | Streamlit renders over a websocket after page load, so we drive Chrome through its DevTools protocol and wait in real time (`docs/capture_screens.py`). |
+| 18 | **Misleading colours** | design review | High-risk bars were green and "money protected" showed a red arrow when less fraud occurred; risk is now red, neutral changes are grey, and every colour also has a text label. |
 
 ## 7. Hybrid model architecture
 
@@ -364,35 +370,54 @@ the test set was scored once. Confusion matrix layout: [[TN, FP], [FN, TP]].
 5. **Threshold behaviour under drift.** Thresholds tuned on a 0.14%-fraud validation period carried over well
    to a 0.98%-fraud test period: precision stayed above 0.997 for every deep model.
 
-## 11. Streamlit application
+## 11. FraudGuard console (the product)
 
-Run with `streamlit run app/streamlit_app.py`. Pages can be opened directly with `?page=dashboard`,
-`?page=predict` or `?page=performance`, and `?page=predict&example=fraud` loads and scores a test example.
+The model is delivered as **FraudGuard, a fraud-operations console** for analysts at a mobile-money provider.
+Every transfer is scored and given one of three decisions: **BLOCK** (probability at or above the
+validation-tuned threshold, 0.9989), **REVIEW** (0.50 up to the threshold, sent to an analyst) or
+**APPROVE**. Decisions are always shown as text as well as colour (red, amber, green).
 
-**Dashboard**: dataset statistics, the chronological split, test-period alerts per hour against actual
-fraud, and the highest-risk test transactions.
+Run with `streamlit run app/streamlit_app.py`. The design follows a dark fintech style (navy background,
+Fira Sans / Fira Code, SVG logo and Material icons, no emoji) and has six pages in two groups. Each page has
+its own address: `/` (Overview), `/alerts`, `/investigate?txn=<id>`, `/live`, `/check?example=fraud` (loads
+and scores a fixed test fraud) and `/model`. A status bar on every page shows the model, the block threshold,
+the review band and the monitoring window.
 
-![Dashboard](images/app_dashboard.png)
-*Figure 13. Dashboard page.*
+| Page | What the analyst does there |
+|---|---|
+| **Overview** | Sees business outcomes: money protected, share of fraud caught, alerts, false alarms and fraud missed, with changes over the last 24 simulated hours; alerts against actual fraud per hour, with missed-fraud hours marked. |
+| **Alert queue** | Works through every BLOCK and REVIEW transfer, filtered by decision, type, case status, amount and hours; selects one to open its case. |
+| **Investigate** | Reviews one case: the decision, balances, plain-language "why flagged" signals, how much the model relied on the transaction versus the account history (attention weights), and the destination account's activity (possible mule account); then records **Confirm fraud**, **Mark legit**, **Escalate** or **Start investigating** with notes. |
+| **Live monitor** | Replays the test period hour by hour as a live feed, with ticking counters, a growing chart, a feed of new blocks and a notification each time fraud is blocked; Start, Pause and Reset controls. |
+| **Check transaction** | Scores one transfer like a payment-gateway call: a decision card, the scoring time in milliseconds, the signals, attention weights and the JSON response. |
+| **Model & reports** | Chooses the threshold by business cost: set the cost of one false alarm and see the cost-optimal threshold and the trade-off between false alarms and missed fraud, computed on the **validation** period so the test set stays untouched. Also a model card, the test results table and every report figure. |
 
-**Predict Transaction**: enter a transaction (and optionally the account's earlier transactions), or load
-a real test example. The app shows the fraud probability, the decision at the validation-tuned threshold,
-the fusion attention (transaction vs history), the temporal attention over the window, and the raw signals
-behind the decision.
+![Overview](images/app_overview.png)
+*Figure 13. Overview: 6.25B of fraud blocked over the test period, 99.3% of fraud caught, 11 false alarms.*
 
-![Predict transaction](images/app_predict.png)
-*Figure 14. A real test fraud scored at 100%: the origin account is fully drained and the destination
-balances do not change.*
+![Alert queue](images/app_alerts.png)
+*Figure 14. Alert queue: 4,098 alerts (3,991 blocked, 107 for review), filterable, with case status.*
 
-**Model Performance**: the full test metrics table for all six models, plus tabs with the comparison,
-confusion matrices, ROC/PR curves, training curves and the architecture.
+![Investigate](images/app_investigate.png)
+*Figure 15. Case investigation: a drained account sending its full balance to an untouched destination.
+The model relied 98% on the transaction itself and 2% on account history.*
 
-![Model performance](images/app_performance.png)
-*Figure 15. Model Performance page.*
+![Check transaction](images/app_check.png)
+*Figure 16. Check transaction: a real test fraud scored at 100% and blocked in about 0.2 seconds.*
+
+![Model and reports](images/app_model.png)
+*Figure 17. Threshold and cost: at a false-alarm cost of 2,000 the cost-optimal threshold equals the deployed
+F1-tuned threshold (one missed fraud, one false alarm on validation).*
+
+![Live monitor](images/app_live.png)
+*Figure 18. Live monitor before the replay starts.*
+
+Analyst decisions are kept for the browser session only; a real deployment would store them in a database
+shared by all analysts.
 
 ## 12. Testing and quality checks
 
-31 automated tests (pytest) cover every stage:
+41 automated tests (pytest) cover every stage:
 
 | Test file | What it guarantees |
 |---|---|
@@ -402,7 +427,7 @@ confusion matrices, ROC/PR curves, training curves and the architecture.
 | `test_metrics.py` | confusion matrix layout [[TN, FP], [FN, TP]], threshold selection, class weights |
 | `test_models.py` | valid probabilities, padding cannot change output, attention sums to 1, save/load round-trip |
 | `test_inference.py` | app scoring equals batch pipeline to 1e-5 |
-| `test_app.py` | every Streamlit page renders without errors; prediction and metrics tables are present |
+| `test_app.py` | all six pages render without errors; scoring, analyst decisions and the live replay work; decision tiers, money metrics and risk signals are correct; the cost curve matches a direct calculation at every threshold and is never beaten by a fixed threshold |
 
 Other checks: all arrays finite, train features standardized, every figure inspected by eye, the evaluation
 dry-run on the development sample before the single full test run, and manual browser checks of the app.
