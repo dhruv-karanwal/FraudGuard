@@ -100,8 +100,8 @@ def system_architecture(path):
     # 5. Serving
     box(ax, 0.06, 0.02, 0.28, 0.11, "Predictor (src/inference.py)",
         "raw fields -> same features\n-> probability + attention", C_APP)
-    box(ax, 0.38, 0.02, 0.6, 0.11, "Streamlit app (app/streamlit_app.py)",
-        "Dashboard  |  Predict Transaction  |  Model Performance\nreads models/, reports/ and test metadata", C_APP)
+    box(ax, 0.38, 0.02, 0.6, 0.11, "FraudGuard console (app/)",
+        "Overview | Alert queue | Investigate | Live monitor | Check | Model\nBLOCK / REVIEW / APPROVE decisions", C_APP)
     arrow(ax, (0.2, 0.16), (0.2, 0.13), text="model + threshold")
     arrow(ax, (0.34, 0.075), (0.38, 0.075))
     arrow(ax, (0.84, 0.16), (0.84, 0.13), text="reports/ figures, metrics")
