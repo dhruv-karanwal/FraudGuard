@@ -80,8 +80,14 @@ python -m pytest -q
 ```
 All randomness uses seed 42. `src.evaluate` refuses to score the test set twice unless given `--force`.
 
-## App
-- **Dashboard**: dataset stats, test-period alerts per hour, highest-risk transactions.
-- **Predict Transaction**: score a TRANSFER/CASH_OUT (optionally with the account's earlier transactions);
-  shows probability, decision, and fusion and temporal attention weights. Can load real test examples.
-- **Model Performance**: test metrics for all models, confusion matrices, ROC/PR, training curves, architecture.
+## App: FraudGuard console
+A six-page fraud-operations console (`streamlit run app/streamlit_app.py`). Every transfer gets a decision:
+BLOCK, REVIEW or APPROVE.
+- **Overview**: money protected, fraud caught, alerts, false alarms and missed fraud; alerts against actual fraud per hour.
+- **Alert queue** (`/alerts`): filter BLOCK/REVIEW alerts and open a case.
+- **Investigate** (`/investigate`): why it was flagged, what drove the model, destination activity, analyst actions.
+- **Live monitor** (`/live`): replay the test period hour by hour with live counters and notifications.
+- **Check transaction** (`/check`): score one transfer with a decision card and JSON response (`/check?example=fraud` demo).
+- **Model & reports** (`/model`): cost-based threshold explorer on validation data, model card, test results, figures.
+
+Screenshots and details: Section 11 of [docs/PROJECT_DOCUMENTATION.md](docs/PROJECT_DOCUMENTATION.md).
