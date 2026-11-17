@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="190" height="40" viewBox="0 0 190 40" role="img" aria-label="FraudGuard">
-  <path d="M18 3 L32 8 V19 C32 28 26 34 18 37 C10 34 4 28 4 19 V8 Z" fill="#22C55E"/>
-  <path d="M11 20 L16 25 L26 14" fill="none" stroke="#020617" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="42" y="27" font-family="Fira Sans, sans-serif" font-size="20" font-weight="700" fill="#F8FAFC">FraudGuard</text>
+  <path d="M18 3 L32 8 V19 C32 28 26 34 18 37 C10 34 4 28 4 19 V8 Z" fill="#171717"/>
+  <path d="M11 20 L16 25 L26 14" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="42" y="27" font-family="Fira Sans, sans-serif" font-size="20" font-weight="700" fill="#171717">FraudGuard</text>
 </svg>

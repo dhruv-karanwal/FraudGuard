@@ -1,13 +1,18 @@
-# Dark fintech console theme (navy background, green = approve/primary).
+# Light monochrome console theme: white surfaces, charcoal ink. Red/amber/green are reserved for risk decisions.
 [theme]
-base = "dark"
-primaryColor = "#22C55E"
-backgroundColor = "#020617"
-secondaryBackgroundColor = "#0E1223"
-textColor = "#F8FAFC"
-borderColor = "#334155"
+base = "light"
+primaryColor = "#171717"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F4F4F5"
+textColor = "#171717"
+borderColor = "#E4E4E7"
 font = "Fira Sans:https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&display=swap, sans-serif"
 codeFont = "Fira Code:https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap, monospace"
+codeTextColor = "#171717"
+codeBackgroundColor = "#F4F4F5"
+
+[theme.sidebar]
+backgroundColor = "#FAFAFA"
 
 [client]
 toolbarMode = "minimal"
